@@ -8,7 +8,7 @@ A lightweight Azure Data Factory (ADF) deployment process written in PowerShell 
    1. [Parameters](#parameters)
 1. [ADF Objects Folder](#adf-objects-folder)
 1. [Background](#background)
-   1. [Context] (#context)
+   1. [Context](#context)
    1. [ADF Automation Options](#adf-automation-options)
 1. [Prerequisites](#Prerequisites)
 1. [Legal](#legal)
@@ -27,12 +27,12 @@ This script can be run in two different modes:
 1. Manual Azure Login
 1. Automated Azure Login
 
-In the Manual Azure Login mode the script executes the `Connect-AzAccount` CmdLet and interactively prompts the user to login. This is the default mode of the script and will be triggered when called with only the required parameters have been passed.
+In the Manual Azure Login mode the script executes the `Connect-AzAccount` CmdLet and interactively prompts the user to login. This is the default mode of the script and will be triggered when only the required parameters have been passed.
 
-In the Automated Azure Login mode the script executes the `Connect-AzAccount -ServicePrincipal ...` CmdLet to login using the supplied Azure Active Directory App Registration (service account) credentials. Use this mode when calling this scripts from your DevOps pipeline.  This mode is triggered by passing the `serviceAccountDeployAppId` parameter to the sript and setting the `ADF_DEPLOY_APP_REGISTRATION_SECRET` environment variable.
+In the Automated Azure Login mode the script executes the `Connect-AzAccount -ServicePrincipal ...` CmdLet to login using the supplied Azure Active Directory App Registration (service account) credentials. Use this mode when calling this script from your DevOps pipeline.  This mode is triggered by passing the `serviceAccountDeployAppId` parameter to the sript and setting the `ADF_DEPLOY_APP_REGISTRATION_SECRET` environment variable.
 
 ### Parameters
-Here is the list of support parameters to the script. The last two *optional* parameters are used to control which [execution mode](#execution-modes) the script runs under. 
+Here is the list of supported parameters to the script. The last two *optional* parameters are used to control which [execution mode](#execution-modes) the script runs under. 
 
 Parameter | Type | Description
 --- | --- | ---
@@ -68,16 +68,16 @@ This script assumes that the ADF objects can be found in the `/adf-objects` fold
 ### Context
 This script provides an alternative to Microsoft's suggested ADF CI/CD approach outlined in [Continuous integration and delivery in Azure Data Factory](https://docs.microsoft.com/en-us/azure/data-factory/continuous-integration-deployment). In my opinion Microsoft's approach has two significant drawbacks:
 
-1. The approach is a bit convoluted involving two separate code structures and processes. For part of the process it uses individual files in regular project branches and then switches to using a single ARM templates in a dedicated `adf_publish` branch.
+1. The approach is a bit convoluted involving two separate code structures and development lifecycle processes. For part of the process it uses individual files in regular project branches and then switches to using a single ARM templates in a dedicated `adf_publish` branch.
 1. The use of the `adf_publish` branch is artifical and breaks with source control best practices. The code folder structure should be the same between branches of the same project.
 
-That said deploying ADF objects is difficult and there is no easy answer. The following section outlines the possible approaches.
+That said deploying ADF objects is difficult and there is currently no easy answer. The following section outlines the possible approaches.
 
 ### ADF Automation Options
 There are 3 primary options for automating the management and deployment of ADF objects:
 
 1. Individual Object Files
-   1. Most natural approach, what you'd expect to manage in code and through the development lifecycle
+   1. The most natural approach, what you'd expect to manage in code and through the development lifecycle
    1. Deployment is more complicated due to dependencies and triggers
    1. Only the PowerShell Az CmdLets let you create objects from individual JSON templates!
 1. Single ARM Template
@@ -91,7 +91,7 @@ There are 3 primary options for automating the management and deployment of ADF 
    1. Can use SDK in programming language of choice to accomplish (python, .NET, Java, JavaScript)
    1. How do you make this metadata driven? Need another layer like what JSON templates already provide
 
-This script implements option #1 Individual Object Files.
+This script implements Option #1 Individual Object Files.
 
 
 ## Prerequisites
