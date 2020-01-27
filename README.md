@@ -1,5 +1,18 @@
 # adfdeploy
-A lightweight Azure Data Factory (ADF) deployment process written in PowerShell Core.
+A lightweight Azure Data Factory (ADF) deployment process written in PowerShell Core. This script is inteded primarily to be used in release automation (CI/CD) pipelines. See the [Background](#background) section for more context.
+
+## Table of Contents
+1. [Usage](#usage)
+   1. [Overview](#overview)
+   1. [Execution Modes](#execution-modes)
+   1. [Parameters](#parameters)
+1. [ADF Objects Folder](#adf-objects-folder)
+1. [Background](#background)
+   1. [Context] (#context)
+   1. [ADF Automation Options](#adf-automation-options)
+1. [Prerequisites](#Prerequisites)
+1. [Legal](#legal)
+
 
 ## Usage
 ### Overview
@@ -33,6 +46,7 @@ ADF_DEPLOY_APP_REGISTRATION_SECRET | Environment Variable | *(Optional)* The ser
 
 **Please Note:** The `ADF_DEPLOY_APP_REGISTRATION_SECRET` parameter is passed through an environment variable, not a regular PowerShell parameter. The reason for this is that this script is intended primarily to be used in release automation (CI/CD) scenarios. When running on a hosted build agent the recommended method for passing sensitive information is through environment variables, not command line arguments (which can get logged).
 
+
 ## ADF Objects Folder
 This script assumes that the ADF objects can be found in the `/adf-objects` folder within the `projectRoot` folder (specified as a parameter to the script). The `/adf-objects` folder should have the following structure (as managed by ADF in Git Repository mode):
 
@@ -50,8 +64,45 @@ This script assumes that the ADF objects can be found in the `/adf-objects` fold
     |   |-> trigger.json
 ```
 
+## Background
+### Context
+This script provides an alternative to Microsoft's suggested ADF CI/CD approach outlined in [Continuous integration and delivery in Azure Data Factory](https://docs.microsoft.com/en-us/azure/data-factory/continuous-integration-deployment). In my opinion Microsoft's approach has two significant drawbacks:
+
+1. The approach is a bit convoluted involving two separate code structures and processes. For part of the process it uses individual files in regular project branches and then switches to using a single ARM templates in a dedicated `adf_publish` branch.
+1. The use of the `adf_publish` branch is artifical and breaks with source control best practices. The code folder structure should be the same between branches of the same project.
+
+That said deploying ADF objects is difficult and there is no easy answer. The following section outlines the possible approaches.
+
+### ADF Automation Options
+There are 3 primary options for automating the management and deployment of ADF objects:
+
+1. Individual Object Files
+   1. Most natural approach, what you'd expect to manage in code and through the development lifecycle
+   1. Deployment is more complicated due to dependencies and triggers
+   1. Only the PowerShell Az CmdLets let you create objects from individual JSON templates!
+1. Single ARM Template
+   1. Microsoft’s suggested approach
+   1. The adf_publish branch is artificial and doesn't follow source control best practices
+   1. Pretty good about adding parameters for hard-coded values
+   1. ARM templates are super easy to deploy, can use any access method
+1. Pure Code
+   1. Creating pipelines and relationships between objects in code is a pain
+   1. Very complicated due to dependencies
+   1. Can use SDK in programming language of choice to accomplish (python, .NET, Java, JavaScript)
+   1. How do you make this metadata driven? Need another layer like what JSON templates already provide
+
+This script implements option #1 Individual Object Files.
+
+
 ## Prerequisites
-This script depends on the Azure PowerShell Az CmdLets.
+In order to run this script you must have the following:
+
+1. An Azure account and subscription
+1. An Azure Data Factory (ADF) resource created in your Azure subscription
+1. An Azure Active Directory App Registration created with at least `Data Factory Contributor` role access
+1. [PowerShell Core](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell) installed on your computer or build agent
+1. The [Azure PowerShell Core Az Module](https://docs.microsoft.com/en-us/powershell/azure/new-azureps-module-az) installed on your computer or build agent
+
 
 ## Legal
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this script except in compliance with the License. You may obtain a copy of the License at: [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
